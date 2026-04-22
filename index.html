@@ -1,0 +1,1091 @@
+<!DOCTYPE HTML>
+<!--
+	Escape Velocity by HTML5 UP — customised for Dylan Crimmings' Veilfall Showcase
+-->
+<html>
+<head>
+	<title>Veilfall — A C++ Character Action Game</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<style>
+		:root {
+			--clr-bg:       #0d0a14;
+			--clr-deep:     #080610;
+			--clr-mid:      #130f1e;
+			--clr-surface:  #1a1529;
+			--clr-fog:      #6b3fa0;
+			--clr-fog-lt:   #9b6fd4;
+			--clr-fog-pale: #c9a8f0;
+			--clr-gold:     #c9a84c;
+			--clr-gold-lt:  #e8d08a;
+			--clr-text:     #e8d08a;
+			--clr-muted:    #a8864a;
+			--clr-dim:      #5a3f1a;
+			--font-title:   'Cinzel', serif;
+			--font-body:    'IM Fell English', serif;
+			--font-mono:    'Share Tech Mono', monospace;
+		}
+
+		*, *::before, *::after { box-sizing: border-box; }
+
+		body {
+			background: var(--clr-bg);
+			color: var(--clr-text);
+			font-family: var(--font-body);
+			font-size: 1.05rem;
+			line-height: 1.8;
+			margin: 0;
+			overflow-x: hidden;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			inset: 0;
+			background:
+				radial-gradient(ellipse 120% 50% at 20% 80%, rgba(107,63,160,0.12) 0%, transparent 60%),
+				radial-gradient(ellipse 80% 60% at 80% 20%, rgba(107,63,160,0.08) 0%, transparent 55%),
+				radial-gradient(ellipse 60% 40% at 50% 100%, rgba(107,63,160,0.15) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: 0;
+			animation: fogDrift 18s ease-in-out infinite alternate;
+		}
+
+		body::after {
+			content: '';
+			position: fixed;
+			inset: 0;
+			background: repeating-linear-gradient(
+				0deg, transparent, transparent 3px,
+				rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+			);
+			pointer-events: none;
+			z-index: 9999;
+		}
+
+		@keyframes fogDrift {
+			from { opacity: 0.6; }
+			to   { opacity: 1; }
+		}
+
+		#site-nav {
+			position: sticky;
+			top: 0;
+			z-index: 500;
+			background: rgba(13,10,20,0.94);
+			backdrop-filter: blur(14px);
+			border-bottom: 1px solid rgba(107,63,160,0.25);
+			padding: 0 2.5rem;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			height: 58px;
+		}
+		.nav-logo {
+			font-family: var(--font-title);
+			font-size: 1rem;
+			letter-spacing: 0.2em;
+			color: var(--clr-fog-pale);
+			text-decoration: none;
+			text-transform: uppercase;
+		}
+		.nav-links {
+			display: flex; gap: 2.5rem;
+			list-style: none; margin: 0; padding: 0;
+		}
+		.nav-links a {
+			font-family: var(--font-mono);
+			font-size: 0.68rem;
+			letter-spacing: 0.2em;
+			text-transform: uppercase;
+			color: var(--clr-muted);
+			text-decoration: none;
+			transition: color 0.2s;
+		}
+		.nav-links a:hover { color: var(--clr-fog-pale); }
+
+		#hero {
+			position: relative;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			padding: 2rem;
+			overflow: hidden;
+			z-index: 1;
+		}
+
+		.hero-ornament {
+			font-family: var(--font-title);
+			font-size: 1.2rem;
+			color: var(--clr-gold);
+			letter-spacing: 1rem;
+			opacity: 0;
+			animation: fadeUp 0.6s 0.1s forwards;
+		}
+
+		.hero-eyebrow {
+			font-family: var(--font-mono);
+			font-size: 0.7rem;
+			letter-spacing: 0.3em;
+			color: var(--clr-fog-lt);
+			text-transform: uppercase;
+			margin: 1rem 0;
+			opacity: 0;
+			animation: fadeUp 0.6s 0.25s forwards;
+		}
+
+		.hero-title {
+			font-family: var(--font-title);
+			font-size: clamp(4.5rem, 15vw, 11rem);
+			font-weight: 900;
+			color: #fff;
+			line-height: 0.88;
+			margin: 0 0 0.3rem;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			text-shadow: 0 0 80px rgba(107,63,160,0.5), 0 0 160px rgba(107,63,160,0.25);
+			opacity: 0;
+			animation: fadeUp 0.8s 0.4s forwards;
+		}
+
+		.hero-subtitle {
+			font-family: var(--font-body);
+			font-style: italic;
+			font-size: clamp(1rem, 2.5vw, 1.4rem);
+			color: var(--clr-fog-pale);
+			margin: 0.8rem 0 2rem;
+			opacity: 0;
+			animation: fadeUp 0.7s 0.6s forwards;
+		}
+
+		.hero-rule {
+			width: 200px;
+			height: 1px;
+			background: linear-gradient(90deg, transparent, var(--clr-fog), transparent);
+			margin: 0 auto 2rem;
+			opacity: 0;
+			animation: fadeUp 0.7s 0.75s forwards;
+		}
+
+		.hero-tags {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.7rem;
+			justify-content: center;
+			margin-bottom: 3rem;
+			opacity: 0;
+			animation: fadeUp 0.7s 0.9s forwards;
+		}
+		.tag {
+			font-family: var(--font-mono);
+			font-size: 0.65rem;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			border: 1px solid rgba(107,63,160,0.4);
+			color: var(--clr-fog-lt);
+			padding: 0.3rem 0.9rem;
+			background: rgba(107,63,160,0.07);
+			transition: background 0.2s, border-color 0.2s;
+		}
+		.tag:hover {
+			background: rgba(107,63,160,0.18);
+			border-color: var(--clr-fog-lt);
+		}
+
+		.scroll-hint {
+			position: absolute;
+			bottom: 2.5rem;
+			left: 50%;
+			transform: translateX(-50%);
+			font-family: var(--font-mono);
+			font-size: 0.62rem;
+			letter-spacing: 0.25em;
+			color: var(--clr-dim);
+			text-transform: uppercase;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.6rem;
+			opacity: 0;
+			animation: fadeUp 0.7s 1.4s forwards;
+		}
+		.scroll-hint::after {
+			content: '';
+			width: 1px;
+			height: 40px;
+			background: linear-gradient(var(--clr-fog), transparent);
+			animation: pulse 2s infinite;
+		}
+
+		.stat-strip {
+			position: relative;
+			z-index: 1;
+			background: var(--clr-deep);
+			border-top: 1px solid rgba(107,63,160,0.2);
+			border-bottom: 1px solid rgba(107,63,160,0.2);
+			padding: 3.5rem 2rem;
+		}
+		.stat-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			gap: 2rem;
+			max-width: 1100px;
+			margin: 0 auto;
+			text-align: center;
+		}
+		.stat-num {
+			display: block;
+			font-family: var(--font-title);
+			font-size: 2.6rem;
+			font-weight: 700;
+			color: var(--clr-fog-pale);
+			line-height: 1;
+		}
+		.stat-lbl {
+			display: block;
+			font-family: var(--font-mono);
+			font-size: 0.62rem;
+			letter-spacing: 0.18em;
+			color: var(--clr-muted);
+			text-transform: uppercase;
+			margin-top: 0.5rem;
+		}
+
+		.section {
+			position: relative;
+			z-index: 1;
+			padding: 7rem 2rem;
+			max-width: 1100px;
+			margin: 0 auto;
+		}
+
+		.section-label {
+			font-family: var(--font-mono);
+			font-size: 0.65rem;
+			letter-spacing: 0.3em;
+			color: var(--clr-fog-lt);
+			text-transform: uppercase;
+			margin-bottom: 0.5rem;
+		}
+
+		.section-title {
+			font-family: var(--font-title);
+			font-size: clamp(1.8rem, 4vw, 3rem);
+			font-weight: 700;
+			color: #f0eaff;
+			line-height: 1.1;
+			margin: 0 0 2rem;
+			letter-spacing: 0.03em;
+		}
+
+		.section-body {
+			max-width: 680px;
+			font-size: 1.05rem;
+			line-height: 1.85;
+			color: var(--clr-text);
+		}
+		.section-body p { margin: 0 0 1.1em; }
+
+		.divider {
+			border: none;
+			position: relative;
+			z-index: 1;
+			height: 1px;
+			background: linear-gradient(90deg, transparent, rgba(107,63,160,0.25), transparent);
+			margin: 0;
+		}
+
+		.card-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+			gap: 1.5rem;
+			margin-top: 3rem;
+		}
+
+		.card {
+			background: var(--clr-surface);
+			border: 1px solid rgba(107,63,160,0.18);
+			padding: 2rem 1.8rem;
+			position: relative;
+			overflow: hidden;
+			transition: border-color 0.3s, transform 0.3s;
+		}
+		.card::before {
+			content: '';
+			position: absolute;
+			top: 0; left: 0; right: 0;
+			height: 2px;
+			background: linear-gradient(90deg, var(--clr-fog), var(--clr-fog-pale), transparent);
+			opacity: 0;
+			transition: opacity 0.3s;
+		}
+		.card:hover { border-color: rgba(107,63,160,0.45); transform: translateY(-4px); }
+		.card:hover::before { opacity: 1; }
+
+		.card-num {
+			font-family: var(--font-title);
+			font-size: 2.2rem;
+			color: rgba(107,63,160,0.25);
+			line-height: 1;
+			margin-bottom: 0.6rem;
+		}
+		.card-title {
+			font-family: var(--font-title);
+			font-size: 1.05rem;
+			color: var(--clr-fog-pale);
+			margin: 0 0 0.7rem;
+			letter-spacing: 0.04em;
+		}
+		.card-text {
+			font-size: 0.88rem;
+			line-height: 1.7;
+			color: var(--clr-muted);
+			margin: 0;
+			font-family: var(--font-body);
+			font-style: italic;
+		}
+
+		.tech-row {
+			display: flex; flex-wrap: wrap; gap: 0.8rem;
+			margin-top: 2.5rem;
+		}
+		.tech-pill {
+			font-family: var(--font-mono);
+			font-size: 0.72rem;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--clr-gold);
+			border: 1px solid rgba(201,168,76,0.3);
+			padding: 0.45rem 1rem;
+			background: rgba(201,168,76,0.04);
+		}
+
+		.screenshot-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+			margin-top: 3rem;
+		}
+		@media (max-width: 600px) { .screenshot-grid { grid-template-columns: 1fr; } }
+
+		.screenshot-item {
+			position: relative;
+			overflow: hidden;
+			border: 1px solid rgba(107,63,160,0.2);
+			cursor: pointer;
+			background: #000;
+		}
+		.screenshot-item img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+			transition: transform 0.4s, filter 0.4s;
+			filter: brightness(0.9);
+		}
+		.screenshot-item:hover img {
+			transform: scale(1.04);
+			filter: brightness(1.05);
+		}
+		.screenshot-item::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border: 1px solid rgba(107,63,160,0);
+			transition: border-color 0.3s;
+			pointer-events: none;
+		}
+		.screenshot-item:hover::after {
+			border-color: rgba(107,63,160,0.6);
+		}
+
+		/* lightbox */
+		#lightbox {
+			display: none;
+			position: fixed;
+			inset: 0;
+			z-index: 2000;
+			background: rgba(8,6,16,0.96);
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+		}
+		#lightbox.open { display: flex; }
+		#lightbox img {
+			max-width: 92vw;
+			max-height: 92vh;
+			object-fit: contain;
+			border: 1px solid rgba(107,63,160,0.3);
+		}
+
+		.enemy-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1.5rem;
+			margin-top: 3rem;
+		}
+		@media (max-width: 600px) { .enemy-grid { grid-template-columns: 1fr; } }
+
+		.enemy-card {
+			background: var(--clr-mid);
+			border: 1px solid rgba(107,63,160,0.2);
+			padding: 2rem;
+			position: relative;
+		}
+		.enemy-card::before {
+			content: attr(data-type);
+			position: absolute;
+			top: 1.2rem; right: 1.2rem;
+			font-family: var(--font-mono);
+			font-size: 0.58rem;
+			letter-spacing: 0.18em;
+			text-transform: uppercase;
+			color: var(--clr-fog-lt);
+			border: 1px solid rgba(107,63,160,0.3);
+			padding: 0.15rem 0.5rem;
+		}
+		.enemy-name {
+			font-family: var(--font-title);
+			font-size: 1.2rem;
+			color: #f0eaff;
+			margin: 0 0 0.7rem;
+			letter-spacing: 0.04em;
+		}
+		.enemy-desc {
+			font-family: var(--font-body);
+			font-style: italic;
+			font-size: 0.88rem;
+			color: var(--clr-muted);
+			line-height: 1.7;
+			margin: 0;
+		}
+
+		.timeline {
+			margin-top: 3rem;
+			padding-left: 2.5rem;
+			position: relative;
+		}
+		.timeline::before {
+			content: '';
+			position: absolute;
+			left: 0; top: 0.6rem; bottom: 0;
+			width: 1px;
+			background: linear-gradient(rgba(107,63,160,0.6), rgba(107,63,160,0.1) 85%, transparent);
+		}
+		.tl-item { position: relative; padding-bottom: 3rem; }
+		.tl-item::before {
+			content: '';
+			position: absolute;
+			left: -2.5rem;
+			top: 0.55rem;
+			width: 9px; height: 9px;
+			background: var(--clr-fog);
+			border-radius: 50%;
+			transform: translateX(-4px);
+			box-shadow: 0 0 10px rgba(107,63,160,0.7);
+		}
+		.tl-date {
+			font-family: var(--font-mono);
+			font-size: 0.65rem;
+			letter-spacing: 0.2em;
+			color: var(--clr-fog-lt);
+			text-transform: uppercase;
+			margin-bottom: 0.25rem;
+		}
+		.tl-title {
+			font-family: var(--font-title);
+			font-size: 1.05rem;
+			color: #f0eaff;
+			margin: 0 0 0.45rem;
+			letter-spacing: 0.03em;
+		}
+		.tl-desc {
+			font-family: var(--font-body);
+			font-style: italic;
+			font-size: 0.88rem;
+			color: var(--clr-muted);
+			line-height: 1.7;
+			margin: 0;
+		}
+
+		#about {
+			position: relative;
+			z-index: 1;
+			background: var(--clr-deep);
+			border-top: 1px solid rgba(107,63,160,0.2);
+		}
+		.about-inner {
+			max-width: 1100px;
+			margin: 0 auto;
+			padding: 7rem 2rem;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 5rem;
+			align-items: start;
+		}
+		@media (max-width: 700px) {
+			.about-inner { grid-template-columns: 1fr; gap: 3.5rem; }
+		}
+
+		.credit-list {
+			list-style: none;
+			padding: 0;
+			margin: 2rem 0 0;
+		}
+		.credit-list li {
+			display: flex;
+			justify-content: space-between;
+			align-items: baseline;
+			padding: 0.65rem 0;
+			border-bottom: 1px solid rgba(107,63,160,0.1);
+			font-size: 0.88rem;
+		}
+		.credit-list li span:first-child {
+			font-family: var(--font-mono);
+			font-size: 0.65rem;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			color: var(--clr-muted);
+		}
+		.credit-list li span:last-child {
+			color: var(--clr-fog-pale);
+			font-family: var(--font-body);
+			font-style: italic;
+		}
+
+		/* ── Download Section ── */
+		#download {
+			position: relative;
+			z-index: 1;
+			background: var(--clr-deep);
+			border-top: 1px solid rgba(107,63,160,0.2);
+			border-bottom: 1px solid rgba(107,63,160,0.2);
+		}
+		.download-inner {
+			max-width: 1100px;
+			margin: 0 auto;
+			padding: 7rem 2rem;
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 4rem;
+			align-items: center;
+		}
+		@media (max-width: 700px) {
+			.download-inner { grid-template-columns: 1fr; gap: 3rem; }
+		}
+		.download-btn {
+			display: inline-flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			text-decoration: none;
+			position: relative;
+			flex-shrink: 0;
+		}
+		.download-btn-inner {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			background: transparent;
+			border: 1px solid rgba(201,168,76,0.5);
+			padding: 1.4rem 2.8rem;
+			font-family: var(--font-title);
+			font-size: 1rem;
+			letter-spacing: 0.18em;
+			text-transform: uppercase;
+			color: var(--clr-gold-lt);
+			position: relative;
+			overflow: hidden;
+			transition: border-color 0.3s, color 0.3s;
+		}
+		.download-btn-inner::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.03) 100%);
+			opacity: 0;
+			transition: opacity 0.3s;
+		}
+		.download-btn-inner::after {
+			content: '';
+			position: absolute;
+			bottom: 0; left: 0; right: 0;
+			height: 1px;
+			background: linear-gradient(90deg, transparent, var(--clr-gold), transparent);
+			transform: scaleX(0);
+			transition: transform 0.4s ease;
+		}
+		.download-btn:hover .download-btn-inner {
+			border-color: rgba(201,168,76,0.9);
+			color: #fff;
+		}
+		.download-btn:hover .download-btn-inner::before { opacity: 1; }
+		.download-btn:hover .download-btn-inner::after  { transform: scaleX(1); }
+
+		.download-btn-icon {
+			width: 20px;
+			height: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+		}
+		.download-btn-icon svg {
+			width: 18px;
+			height: 18px;
+			stroke: currentColor;
+			fill: none;
+			stroke-width: 1.5;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+			transition: transform 0.3s;
+		}
+		.download-btn:hover .download-btn-icon svg {
+			transform: translateY(2px);
+		}
+
+		.download-btn-note {
+			font-family: var(--font-mono);
+			font-size: 0.58rem;
+			letter-spacing: 0.2em;
+			text-transform: uppercase;
+			color: var(--clr-dim);
+		}
+
+		.download-corner {
+			position: absolute;
+			width: 10px; height: 10px;
+			border-color: var(--clr-gold);
+			border-style: solid;
+			transition: border-color 0.3s;
+		}
+		.download-corner.tl { top: -1px; left: -1px;  border-width: 1px 0 0 1px; }
+		.download-corner.tr { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+		.download-corner.bl { bottom: -1px; left: -1px;  border-width: 0 0 1px 1px; }
+		.download-corner.br { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+		footer {
+			position: relative;
+			z-index: 1;
+			padding: 2.5rem;
+			text-align: center;
+			font-family: var(--font-mono);
+			font-size: 0.62rem;
+			letter-spacing: 0.15em;
+			color: var(--clr-dim);
+			border-top: 1px solid rgba(107,63,160,0.1);
+		}
+		footer a { color: var(--clr-fog-lt); text-decoration: none; }
+
+		.hl      { color: var(--clr-fog-pale); }
+		.hl-gold { color: var(--clr-gold-lt); }
+
+		.hero-video-bg {
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			overflow: hidden;
+		}
+		.hero-video-bg video {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			filter: blur(10px) brightness(0.2) saturate(1.4);
+			transform: scale(1.06);
+		}
+		#hero > *:not(.hero-video-bg) { position: relative; z-index: 2; }
+
+		.video-window-wrap {
+			position: relative;
+			z-index: 0;
+			height: 200vh;
+		}
+		.video-window {
+			position: sticky;
+			top: 58px;
+			width: 100%;
+			height: calc(100vh - 58px);
+			overflow: hidden;
+			background: #000;
+		}
+		.video-window video {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+			background: #000;
+		}
+		.video-window-label {
+			position: absolute;
+			bottom: 1.5rem;
+			left: 50%;
+			transform: translateX(-50%);
+			font-family: var(--font-mono);
+			font-size: 0.62rem;
+			letter-spacing: 0.25em;
+			text-transform: uppercase;
+			color: rgba(232,208,138,0.35);
+			pointer-events: none;
+			white-space: nowrap;
+		}
+		.video-scroll-cover {
+			position: relative;
+			z-index: 1;
+			background: var(--clr-bg);
+			margin-top: -100vh;
+		}
+
+		@keyframes fadeUp {
+			from { opacity: 0; transform: translateY(24px); }
+			to   { opacity: 1; transform: translateY(0); }
+		}
+		@keyframes pulse {
+			0%, 100% { opacity: 1; }
+			50%       { opacity: 0.25; }
+		}
+	</style>
+</head>
+<body>
+
+	<nav id="site-nav">
+		<a class="nav-logo" href="#hero">Veilfall</a>
+		<ul class="nav-links">
+			<li><a href="#overview">Overview</a></li>
+			<li><a href="#gameplay">Gameplay</a></li>
+			<li><a href="#systems">Systems</a></li>
+			<li><a href="#screenshots">Screenshots</a></li>
+			<li><a href="#enemies">Enemies</a></li>
+			<li><a href="#timeline">Timeline</a></li>
+			<li><a href="#download">Download</a></li>
+			<li><a href="#about">About</a></li>
+		</ul>
+	</nav>
+
+	<section id="hero">
+		<div class="hero-video-bg">
+			<video autoplay muted loop playsinline>
+				<source src="veilfalldemo.webm" type="video/webm">
+			</video>
+		</div>
+		<p class="hero-ornament">&#10022; &nbsp; &#10022; &nbsp; &#10022;</p>
+		<p class="hero-eyebrow">Year IV Final Project &mdash; Computer Games Development</p>
+		<h1 class="hero-title">Veilfall</h1>
+		<p class="hero-subtitle"><em>A wave-based character action game built in C++ and Ogre3D</em></p>
+		<div class="hero-rule"></div>
+		<div class="hero-tags">
+			<span class="tag">Hack &amp; Slash</span>
+			<span class="tag">3D Real-Time</span>
+			<span class="tag">State Machines</span>
+			<span class="tag">N64-Style Visuals</span>
+			<span class="tag">AI Pooling</span>
+			<span class="tag">Purple Fog</span>
+		</div>
+		<div class="scroll-hint">Scroll</div>
+		<img src="heroKeyart1.png" alt="Player character" style="
+			position: absolute;
+			bottom: 0;
+			right: 8%;
+			height: 72vh;
+			width: auto;
+			object-fit: contain;
+			pointer-events: none;
+			mask-image: linear-gradient(to top, transparent 0%, black 18%, black 85%, transparent 100%);
+			-webkit-mask-image: linear-gradient(to top, transparent 0%, black 18%, black 85%, transparent 100%);
+			opacity: 0;
+			animation: fadeUp 1s 1s forwards;
+		" />
+	</section>
+
+	<div class="stat-strip">
+		<div class="stat-grid">
+			<div>
+				<span class="stat-num">3D</span>
+				<span class="stat-lbl">Full 3D Rendering</span>
+			</div>
+            <div>
+                <span class="stat-num">9</span>
+                <span class="stat-lbl">Player moves</span>
+            </div>
+			<div>
+				<span class="stat-num">2</span>
+				<span class="stat-lbl">Enemy Types</span>
+			</div>
+			<div>
+				<span class="stat-num">&#8734;</span>
+				<span class="stat-lbl">Wave Mode</span>
+			</div>
+			<div>
+				<span class="stat-num">20<small style="font-size:1.3rem">fps</small></span>
+				<span class="stat-lbl">Anim Frame Limit</span>
+			</div>
+			<div>
+				<span class="stat-num">C++</span>
+				<span class="stat-lbl">Core Language</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-window-wrap" id="gameplay">
+		<div class="video-window">
+			<video autoplay muted loop playsinline>
+				<source src="veilfalldemo.webm" type="video/webm">
+			</video>
+			<span class="video-window-label">Gameplay &mdash; Veilfall</span>
+		</div>
+	</div>
+
+	<div class="video-scroll-cover">
+
+	<section class="section" id="overview">
+		<p class="section-label">I &mdash; Abstract</p>
+		<h2 class="section-title">About the Game</h2>
+		<div class="section-body">
+			<p>Veilfall is a 3rd-person character action game built using <span class="hl">C++, Ogre3D, and Blender</span>. Ogre3D is a 3D rendering library with little to none in the way of built-in physics or object management, so systems like collision, scene management, and UI were all implemented from scratch. The gameplay is inspired by character action games like Devil May Cry, God of War, and Bayonetta, combined with wave-based gameplay similar to Call of Duty Zombies or DMC's Bloody Palace mode.</p>
+			<p>The game has a <span class="hl">purple fog visual style</span> with a 5th-generation console aesthetic. 3D characters and environment are rendered in 3D space, while UI elements like the main menu and health bar are in 2D. A <span class="hl-gold">20fps animation frame-limiter</span> replicates the look of N64-era games while the game itself runs at 60fps.</p>
+			<p>The final build includes a playable character, one grounded melee enemy, one flying ranged enemy, a battle arena, wave-based difficulty scaling, health, UI, and a main menu.</p>
+		</div>
+		<div class="tech-row">
+			<span class="tech-pill">C++</span>
+			<span class="tech-pill">Ogre3D</span>
+			<span class="tech-pill">Blender</span>
+			<span class="tech-pill">Mixamo</span>
+			<span class="tech-pill">SDL2</span>
+			<span class="tech-pill">imGui</span>
+		</div>
+	</section>
+
+	<hr class="divider">
+
+	<section class="section" id="systems">
+		<p class="section-label">II &mdash; Core Systems</p>
+		<h2 class="section-title">How it Works</h2>
+		<div class="section-body">
+			<p>Four main systems underpin the gameplay, each implemented without engine scaffolding.</p>
+		</div>
+		<div class="card-grid">
+			<div class="card">
+				<div class="card-num">I</div>
+				<h3 class="card-title">State Machine</h3>
+				<p class="card-text">Player and enemy both own a State enum. Depending on the current state, they have different available transitions, update loops, animations, and variables toggled on entry. Player input, input buffering, and cooldowns control the player's state transitions.</p>
+			</div>
+			<div class="card">
+				<div class="card-num">II</div>
+				<h3 class="card-title">AI Behaviour &amp; Pooling</h3>
+				<p class="card-text">Rather than all enemies attacking at once, the pool nominates one aggressor at a time while the rest hold a formation around the player. If the aggressor is being attacked or dies, another takes over. This keeps pressure on the player without everything ganging up simultaneously.</p>
+			</div>
+			<div class="card">
+				<div class="card-num">III</div>
+				<h3 class="card-title">Hitboxes &amp; Hurtboxes</h3>
+				<p class="card-text">The design is intentionally more generous to the player: slightly smaller player hurtbox, slightly larger player hitboxes. The opposite applies to enemies. Accuracy and realism matter less here than game feel — what reads as fair in a multiplayer game can feel frustrating in a singleplayer one.</p>
+			</div>
+			<div class="card">
+				<div class="card-num">IV</div>
+				<h3 class="card-title">Animation Blending</h3>
+				<p class="card-text">The 20fps frame-limiter replicates a stylistic N64 look while the game runs at 60fps. Animations still blend between states so transitions look natural rather than snapping abruptly, which helps the combat feel responsive despite the retro aesthetic.</p>
+			</div>
+			<div class="card">
+				<div class="card-num">V</div>
+				<h3 class="card-title">Input Buffering</h3>
+				<p class="card-text">Attack inputs are buffered to allow early queuing during active states. Combined with attack cancelling and jump cancelling, the player can exit states earlier than the animation would normally allow, which is important for the genre feeling responsive.</p>
+			</div>
+			<div class="card">
+				<div class="card-num">VI</div>
+				<h3 class="card-title">Custom Fog &amp; Materials</h3>
+				<p class="card-text">Ogre's fog either doesn't render on the skybox or fully occludes it. To get the grounded purple fog look, the skybox uses a two-pass material where the second pass copies the world fog colour, creating a vertical gradient that blends into the scene fog.</p>
+			</div>
+		</div>
+	</section>
+
+	<hr class="divider">
+
+	<section class="section" id="screenshots">
+		<p class="section-label">III &mdash; Screenshots</p>
+		<h2 class="section-title">In-Game</h2>
+		<div class="section-body">
+			<p>Click any screenshot to enlarge.</p>
+		</div>
+		<div class="screenshot-grid">
+			<div class="screenshot-item" onclick="openLightbox('screenshot1.png')">
+				<img src="screenshot1.png" alt="Skulls and Redeads surrounding the player in the arena" />
+			</div>
+			<div class="screenshot-item" onclick="openLightbox('screenshot2.png')">
+				<img src="screenshot2.png" alt="Player character standing in the arena with the purple fog skybox" />
+			</div>
+			<div class="screenshot-item" onclick="openLightbox('screenshot3.png')">
+				<img src="screenshot3.png" alt="Wave 1 start, health bar visible, enemy shadows in background" />
+			</div>
+			<div class="screenshot-item" onclick="openLightbox('screenshot4.png')">
+				<img src="screenshot4.png" alt="Player attacking a Redead with sword, afterimage visible" />
+			</div>
+		</div>
+	</section>
+
+	<div id="lightbox" onclick="closeLightbox()">
+		<img id="lightbox-img" src="" alt="" />
+	</div>
+
+	<hr class="divider">
+
+	<section class="section" id="enemies">
+		<p class="section-label">IV &mdash; Enemy Types</p>
+		<h2 class="section-title">Enemies</h2>
+		<div class="section-body">
+			<p>Two enemy types, each designed to be countered through different mechanics so the player has to use the full moveset rather than one approach.</p>
+		</div>
+		<div class="enemy-grid">
+			<div class="enemy-card" data-type="Grounded">
+				<img src="redeadKeyart.png" alt="Redead" style="
+					width: 100%;
+					height: 220px;
+					object-fit: contain;
+					object-position: center bottom;
+					display: block;
+					margin-bottom: 1.2rem;
+					mask-image: linear-gradient(to top, transparent 0%, black 20%);
+					-webkit-mask-image: linear-gradient(to top, transparent 0%, black 20%);
+				" />
+				<h3 class="enemy-name">Redead</h3>
+				<p class="enemy-desc">A grounded enemy that approaches and attacks in melee range. Can be launched into the air with an uppercut move, putting it out of range of other grounded enemies. While it's airborne, other enemies in the pool will take over as aggressor.</p>
+			</div>
+			<div class="enemy-card" data-type="Aerial">
+				<img src="skullKeyart.png" alt="Skull" style="
+					width: 100%;
+					height: 220px;
+					object-fit: contain;
+					object-position: center bottom;
+					display: block;
+					margin-bottom: 1.2rem;
+					mask-image: linear-gradient(to top, transparent 0%, black 20%);
+					-webkit-mask-image: linear-gradient(to top, transparent 0%, black 20%);
+				" />
+				<h3 class="enemy-name">Skull</h3>
+				<p class="enemy-desc">A flying enemy that attacks from range. Added specifically so the air isn't a safe zone when the player launches grounded enemies. The player has a downslam move to exit the airborne state quickly rather than waiting to land.</p>
+			</div>
+		</div>
+		<div style="margin-top:2.5rem" class="section-body">
+			<p>Waves increase in size as the player progresses. Difficulty scales linearly rather than exponentially, so the challenge increases at a consistent rate rather than hitting a sudden spike.</p>
+		</div>
+	</section>
+
+	<hr class="divider">
+
+	<section class="section" id="timeline">
+		<p class="section-label">V &mdash; Development</p>
+		<h2 class="section-title">Project Timeline</h2>
+		<div class="timeline">
+			<div class="tl-item">
+				<p class="tl-date">September 2025</p>
+				<h4 class="tl-title">Project Start</h4>
+				<p class="tl-desc">Initial concept inspired by Devil May Cry, Zelda, Drakengard, and No More Heroes. Planned as a hack-and-slash with puzzle elements. Ogre3D selected as the rendering library. First milestone: player movement and animations by end of October.</p>
+			</div>
+			<div class="tl-item">
+				<p class="tl-date">November 2025</p>
+				<h4 class="tl-title">Player Movement &amp; Animations</h4>
+				<p class="tl-desc">First milestone completed, running about a month behind the original target. Basic movement and animation playback working. Full combat implementation was originally planned for November but got pushed back.</p>
+			</div>
+			<div class="tl-item">
+				<p class="tl-date">February 2026</p>
+				<h4 class="tl-title">State Machine &amp; Combat</h4>
+				<p class="tl-desc">Player states and attacking implemented early February. Full state machine including transitions, cancelling, and input buffering completed later that month. Combat started feeling like the genre at this point.</p>
+			</div>
+			<div class="tl-item">
+				<p class="tl-date">March 2026</p>
+				<h4 class="tl-title">Visual Update &amp; Mid-Project Presentation</h4>
+				<p class="tl-desc">New player model and animations added. The game's visual style came together this month. The mid-project presentation had a basic enemy AI and the completed arena, mostly as a test target for the combat systems.</p>
+			</div>
+			<div class="tl-item">
+				<p class="tl-date">April 2026</p>
+				<h4 class="tl-title">Final Build</h4>
+				<p class="tl-desc">Full AI pooling, player and enemy HP, collision, aerial enemy, wave system, UI, and main menu added. The game has a complete playable loop with a wave high-score goal.</p>
+			</div>
+		</div>
+	</section>
+
+	<hr class="divider">
+
+	<!-- ── Download Section ── -->
+	<section id="download">
+		<div class="download-inner">
+			<div>
+				<p class="section-label">VI &mdash; Build</p>
+				<h2 class="section-title">Download</h2>
+				<div class="section-body">
+					<p>The final build is hosted on Google Drive. The archive contains the compiled executable and all required assets — extract and run <span class="hl-gold">Veilfall.exe</span>. A Windows machine is required; no additional install is needed.</p>
+				</div>
+			</div>
+			<div style="display:flex; align-items:center; justify-content:center;">
+				<a class="download-btn" href="https://drive.google.com/file/d/1onIMPhKxj5DWIgfUgf2q9XZwDvG2oEPB/view?usp=sharing" target="_blank" rel="noopener">
+					<div class="download-btn-inner">
+						<span class="download-corner tl"></span>
+						<span class="download-corner tr"></span>
+						<span class="download-corner bl"></span>
+						<span class="download-corner br"></span>
+						<span class="download-btn-icon">
+							<svg viewBox="0 0 24 24">
+								<path d="M12 3v13M7 11l5 5 5-5"/>
+								<path d="M3 18h18"/>
+							</svg>
+						</span>
+						<span>Download Build</span>
+					</div>
+					<span class="download-btn-note">Google Drive &mdash; Windows</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section id="about">
+		<div class="about-inner">
+			<div>
+				<p class="section-label">VII &mdash; Reflection</p>
+				<h2 class="section-title">What I Learned</h2>
+				<div class="section-body">
+					<p>The main thing I took from this project is a better understanding of why character action games play the way they do. Working through the first iteration of combat without input buffering or attack cancelling made it obvious why those systems exist. The same was true for enemy groups — before the AI pooling was in, enemies would just rush and stunlock the player, which made it clear why coordination systems are necessary.</p>
+					<p>Ogre3D was a good choice for learning how a 3D engine works under the hood, even if the documentation is lacking and some things like UI and controller support were harder to implement than expected. The visual side of the project — particularly the materials system and getting the fog to look right — ended up being more of a learning process than anticipated, but the end result is close to what I had in mind.</p>
+				</div>
+			</div>
+			<div>
+				<p class="section-label">Credits</p>
+				<ul class="credit-list">
+					<li><span>Developer</span><span>Dylan Crimmings</span></li>
+					<li><span>Student ID</span><span>C00273675</span></li>
+					<li><span>Supervisor</span><span>Ben O'Shaughnessy</span></li>
+					<li><span>Programme</span><span>Computer Games Dev, Year 4</span></li>
+					<li><span>Renderer</span><span>Ogre3D</span></li>
+					<li><span>3D Tooling</span><span>Blender + blender2ogre</span></li>
+					<li><span>Animations</span><span>Mixamo (adjusted)</span></li>
+					<li><span>Submitted</span><span>13 April 2026</span></li>
+					<li><span>CV</span><span><a href="https://docs.google.com/document/d/1DWSiLuCPn6p60fc-IICCqSDN7hdIKQhx/edit?usp=sharing&ouid=107923349895264936632&rtpof=true&sd=true" target="_blank" rel="noopener" style="color:var(--clr-fog-pale);text-decoration:none;border-bottom:1px solid rgba(155,111,212,0.35);padding-bottom:1px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(155,111,212,0.9)'" onmouseout="this.style.color='var(--clr-fog-pale)';this.style.borderColor='rgba(155,111,212,0.35)'">View CV ↗</a></span></li>
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	</div><!-- /video-scroll-cover -->
+
+	<footer>
+		<p>Veilfall &mdash; Dylan Crimmings &mdash; C00273675 &mdash; Year IV Computer Games Development<br>
+		Site template base: <a href="http://html5up.net">HTML5 UP</a> Escape Velocity &mdash; CCA 3.0 License</p>
+	</footer>
+
+	<script>
+		function openLightbox(src) {
+			document.getElementById('lightbox-img').src = src;
+			document.getElementById('lightbox').classList.add('open');
+		}
+		function closeLightbox() {
+			document.getElementById('lightbox').classList.remove('open');
+		}
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') closeLightbox();
+		});
+	</script>
+</body>
+</html>
